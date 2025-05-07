@@ -16,7 +16,7 @@ def parseMeal(input:str):
     )
     return response.output_text
 
-with open("prompt.txt") as f:
+with open("ee547project/LLM/prompt.txt") as f:
     # test 1
     prompt = f.read()
     input_text = "I had a bowl of rice and banana and a glass of milk for lunch"
