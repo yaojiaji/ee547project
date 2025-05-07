@@ -8,8 +8,10 @@ node_modules/
 /coverage
 
 # Production
-/build
 /dist
+**/dist
+/build
+**/build
 
 # Misc
 .DS_Store
