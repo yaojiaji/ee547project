@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Divider, IconButton } from '@mui/material';
+import { TextField, Button, Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableRow, Paper } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import { api } from '../services/api';
@@ -224,19 +224,28 @@ export const MealSubmission: React.FC<MealSubmissionProps> = ({ userId }) => {
             Nutrition Analysis Results
           </Typography>
           
-          <Typography variant="subtitle1" gutterBottom>
-            Total Calories: {nutritionData.summary.macros.calories} kcal
-          </Typography>
-          
-          <Typography variant="body1">
-            Protein: {nutritionData.summary.macros.protein_g}g
-          </Typography>
-          <Typography variant="body1">
-            Fat: {nutritionData.summary.macros.fat_g}g
-          </Typography>
-          <Typography variant="body1">
-            Carbohydrates: {nutritionData.summary.macros.carbohydrates_g}g
-          </Typography>
+          <TableContainer component={Paper} sx={{ mt: 2 }}>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Protein</TableCell>
+                  <TableCell align="right">{nutritionData.summary.macros.protein_g}g</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Fat</TableCell>
+                  <TableCell align="right">{nutritionData.summary.macros.fat_g}g</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Carbohydrates</TableCell>
+                  <TableCell align="right">{nutritionData.summary.macros.carbohydrates_g}g</TableCell>
+                </TableRow>
+                <TableRow sx={{ backgroundColor: 'primary.light' }}>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Total Calories</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>{nutritionData.summary.macros.calories} kcal</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       )}
     </Box>

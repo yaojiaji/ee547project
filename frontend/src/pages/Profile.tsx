@@ -14,6 +14,11 @@ import {
   SelectChangeEvent,
   Alert,
   Snackbar,
+  TableContainer,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
 } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import {
@@ -188,6 +193,37 @@ const Profile = () => {
                   disabled={loading}
                 />
               </Grid>
+              
+              <Grid item xs={12}>
+                <Paper variant="outlined" sx={{ p: 2, mt: 2, mb: 2 }}>
+                  <TableContainer>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Basal Metabolic Rate (BMR)</TableCell>
+                          <TableCell align="right">{bmr} kcal/day</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                            Calculated using the Mifflin-St Jeor Equation
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Daily Calorie Goal</TableCell>
+                          <TableCell align="right">{calorieGoal} kcal/day</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                            Based on your macronutrient goals
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Basic Information
+                </Typography>
+              </Grid>
               <Grid item xs={12} sm={3}>
                 <TextField
                   fullWidth
@@ -238,29 +274,6 @@ const Profile = () => {
                     <MenuItem value="female">Female</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, mt: 2, mb: 2 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="h6" gutterBottom>
-                        Basal Metabolic Rate (BMR): {bmr} kcal/day
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Calculated using the Mifflin-St Jeor Equation
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="h6" gutterBottom>
-                        Daily Calorie Goal: {calorieGoal} kcal/day
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Based on your macronutrient goals
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Paper>
               </Grid>
 
               <Grid item xs={12}>

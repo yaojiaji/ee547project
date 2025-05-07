@@ -50,6 +50,7 @@ interface AnalyzeResponse {
     timestamp: string;
     foods: ParsedFood[];
     summary: NutritionSummary;
+    profile?: Profile;
   }>;
 }
 
@@ -65,6 +66,12 @@ interface Profile {
 }
 
 interface UpdateProfileResponse {
+  message: string;
+  userId: string;
+  profile: Profile;
+}
+
+interface GetProfileResponse {
   message: string;
   userId: string;
   profile: Profile;
@@ -102,6 +109,14 @@ export const api = {
     const response = await axios.put(`${API_BASE_URL}/stage8/profile`, {
       userId,
       profile,
+    });
+    return response.data;
+  },
+
+  // 获取用户资料
+  getProfile: async (userId: string): Promise<GetProfileResponse> => {
+    const response = await axios.get(`${API_BASE_URL}/stage8/profile`, {
+      params: { userId },
     });
     return response.data;
   },

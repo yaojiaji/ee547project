@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography, Box } from '@mui/material';
+import { Grid, Paper, Typography, Box, CircularProgress, TableContainer, Table, TableBody, TableRow, TableCell } from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart,
@@ -29,6 +29,48 @@ const Dashboard = () => {
   const { calorieGoal, userId } = useNutrition();
   const [weeklyData, setWeeklyData] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dailyCalories, setDailyCalories] = useState(0);
+  const [dailyMacros, setDailyMacros] = useState({
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
+
+  // 获取当日累计热量和宏量营养素
+  const fetchDailyCalories = async () => {
+    try {
+      const response = await api.getAnalyze(userId);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todayRecords = response.records.filter((record: any) => {
+        const recordDate = new Date(parseInt(record.timestamp));
+        recordDate.setHours(0, 0, 0, 0);
+        return recordDate.getTime() === today.getTime();
+      });
+
+      const totalCalories = todayRecords.reduce((sum: number, record: any) => {
+        return sum + record.summary.macros.calories;
+      }, 0);
+
+      const totalMacros = todayRecords.reduce((acc: any, record: any) => {
+        return {
+          protein: acc.protein + record.summary.macros.protein_g,
+          carbs: acc.carbs + record.summary.macros.carbohydrates_g,
+          fat: acc.fat + record.summary.macros.fat_g
+        };
+      }, { protein: 0, carbs: 0, fat: 0 });
+
+      setDailyCalories(totalCalories);
+      setDailyMacros(totalMacros);
+    } catch (err) {
+      console.error('Failed to fetch daily calories:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDailyCalories();
+  }, [userId]);
 
   useEffect(() => {
     const fetchWeeklyData = async () => {
@@ -150,20 +192,63 @@ const Dashboard = () => {
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <Typography variant="subtitle1">Calories</Typography>
-                <Typography variant="h4">1,850</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <CircularProgress
+                      variant="determinate"
+                      value={Math.min((dailyCalories / calorieGoal) * 100, 100)}
+                      size={80}
+                      thickness={4}
+                      sx={{
+                        color: (theme) => {
+                          const percentage = (dailyCalories / calorieGoal) * 100;
+                          if (percentage > 100) return theme.palette.error.main;
+                          if (percentage > 50) return theme.palette.warning.main;
+                          return theme.palette.success.main;
+                        },
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography variant="caption" component="div" color="text.secondary">
+                        {`${Math.round((dailyCalories / calorieGoal) * 100)}%`}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {dailyCalories} / {calorieGoal} kcal
+                  </Typography>
+                </Box>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="subtitle1">Protein</Typography>
-                <Typography variant="h4">75g</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle1">Carbs</Typography>
-                <Typography variant="h4">220g</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle1">Fat</Typography>
-                <Typography variant="h4">65g</Typography>
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableBody>
+                      <TableRow>
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Protein</TableCell>
+                        <TableCell align="right">{Math.round(dailyMacros.protein)}g</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Carbs</TableCell>
+                        <TableCell align="right">{Math.round(dailyMacros.carbs)}g</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>Fat</TableCell>
+                        <TableCell align="right">{Math.round(dailyMacros.fat)}g</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Grid>
             </Grid>
           </Paper>
