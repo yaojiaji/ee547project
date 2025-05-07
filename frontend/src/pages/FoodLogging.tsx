@@ -27,7 +27,44 @@ interface FoodItem {
 }
 
 const FoodLogging: React.FC = () => {
-  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([
+    {
+      name: "Whole Wheat Bread",
+      quantity: 2,
+      unit: "slices",
+      calories: 160,
+      protein: 8,
+      carbs: 30,
+      fat: 2
+    },
+    {
+      name: "Peanut Butter",
+      quantity: 2,
+      unit: "tbsp",
+      calories: 190,
+      protein: 8,
+      carbs: 6,
+      fat: 16
+    },
+    {
+      name: "Banana",
+      quantity: 1,
+      unit: "medium",
+      calories: 105,
+      protein: 1.3,
+      carbs: 27,
+      fat: 0.3
+    },
+    {
+      name: "Greek Yogurt",
+      quantity: 1,
+      unit: "cup",
+      calories: 130,
+      protein: 17,
+      carbs: 9,
+      fat: 4
+    }
+  ]);
   const [foodDescription, setFoodDescription] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);

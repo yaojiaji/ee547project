@@ -12,13 +12,14 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Restaurant as FoodIcon,
-  Assessment as AnalysisIcon,
   Person as ProfileIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -31,10 +32,14 @@ const Layout = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleLogout = () => {
+    // TODO: Implement actual logout functionality
+    navigate('/login');
+  };
+
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Food Logging', icon: <FoodIcon />, path: '/food-logging' },
-    { text: 'Nutrition Analysis', icon: <AnalysisIcon />, path: '/nutrition-analysis' },
     { text: 'Profile', icon: <ProfileIcon />, path: '/profile' },
   ];
 
@@ -42,7 +47,7 @@ const Layout = () => {
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          Nutrition Analysis
+          Food Logging System
         </Typography>
       </Toolbar>
       <List>
@@ -56,6 +61,12 @@ const Layout = () => {
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
+        <ListItem button onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
       </List>
     </div>
   );
@@ -80,9 +91,17 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Nutrition Analysis System
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            Food Logging System
           </Typography>
+          <Button
+            color="inherit"
+            onClick={handleLogout}
+            startIcon={<LogoutIcon />}
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Box

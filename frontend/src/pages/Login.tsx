@@ -7,6 +7,7 @@ import {
   TextField,
   Typography,
   Paper,
+  Divider,
 } from '@mui/material';
 
 const Login = () => {
@@ -20,6 +21,11 @@ const Login = () => {
     e.preventDefault();
     // TODO: Implement actual authentication
     navigate('/');
+  };
+
+  const handleRegister = () => {
+    // TODO: Implement registration functionality
+    console.log('Register clicked');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +58,7 @@ const Login = () => {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
             <TextField
               margin="normal"
               required
@@ -84,6 +90,15 @@ const Login = () => {
               sx={{ mt: 3, mb: 2 }}
             >
               Sign In
+            </Button>
+            <Divider sx={{ my: 2 }}>OR</Divider>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleRegister}
+              sx={{ mt: 1 }}
+            >
+              Create New Account
             </Button>
           </Box>
         </Paper>

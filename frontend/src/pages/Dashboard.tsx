@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useNutrition } from '../context/NutritionContext';
 
 Chart.register(
   CategoryScale,
@@ -22,6 +23,8 @@ Chart.register(
 );
 
 const Dashboard = () => {
+  const { calorieGoal } = useNutrition();
+
   const nutritionData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     datasets: [
@@ -30,6 +33,14 @@ const Dashboard = () => {
         data: [2100, 1950, 2300, 2100, 2200, 1800, 2000],
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
+      },
+      {
+        label: 'Daily Goal',
+        data: Array(7).fill(calorieGoal),
+        borderColor: 'rgb(255, 99, 132)',
+        borderDash: [5, 5],
+        tension: 0,
+        pointRadius: 0,
       },
     ],
   };
@@ -44,7 +55,30 @@ const Dashboard = () => {
         display: true,
         text: 'Weekly Calorie Intake',
       },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += context.parsed.y + ' kcal';
+            }
+            return label;
+          }
+        }
+      }
     },
+    scales: {
+      y: {
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: 'Calories (kcal)'
+        }
+      }
+    }
   };
 
   return (
