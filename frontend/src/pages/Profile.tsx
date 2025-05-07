@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -7,12 +7,13 @@ import {
   Typography,
   Paper,
   Grid,
-  Avatar,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import {
@@ -22,14 +23,14 @@ import {
   Legend,
 } from 'chart.js';
 import { useNutrition } from '../context/NutritionContext';
+import { api } from '../services/api';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Profile = () => {
-  const { setCalorieGoal } = useNutrition();
+  const { setCalorieGoal, userId } = useNutrition();
   const [profile, setProfile] = useState({
     name: 'John Doe',
-    email: 'john.doe@example.com',
     age: '28',
     weight: '75',
     height: '180',
@@ -41,7 +42,11 @@ const Profile = () => {
 
   const [calorieGoal, setLocalCalorieGoal] = useState(0);
   const [bmr, setBMR] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
+  // Calculate BMR and calorie goals whenever relevant profile fields change
   useEffect(() => {
     // Calculate BMR using Mifflin-St Jeor Equation
     const weight = Number(profile.weight);
@@ -79,13 +84,38 @@ const Profile = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement profile update
-    console.log('Profile updated:', profile);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Calculate total calories before saving
+      const totalCalories = 
+        (Number(profile.proteinGoal) * 4) +
+        (Number(profile.carbsGoal) * 4) +
+        (Number(profile.fatGoal) * 9);
+      
+      // Update the profile
+      await api.updateProfile(userId, profile);
+      
+      // Update the calorie goal in the context
+      setCalorieGoal(totalCalories);
+      
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const macroData = {
+  const handleCloseSnackbar = () => {
+    setSuccess(false);
+  };
+
+  // Use useMemo to calculate chart data only when macronutrient goals change
+  const macroData = useMemo(() => ({
     labels: ['Protein', 'Carbohydrates', 'Fat'],
     datasets: [
       {
@@ -107,7 +137,7 @@ const Profile = () => {
         borderWidth: 1,
       },
     ],
-  };
+  }), [profile.proteinGoal, profile.carbsGoal, profile.fatGoal]);
 
   const options = {
     responsive: true,
@@ -119,6 +149,16 @@ const Profile = () => {
         display: true,
         text: 'Daily Calorie Distribution',
       },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const label = context.label || '';
+            const value = context.raw || 0;
+            const percentage = Math.round((value / calorieGoal) * 100);
+            return `${label}: ${value} kcal (${percentage}%)`;
+          }
+        }
+      }
     },
   };
 
@@ -129,34 +169,23 @@ const Profile = () => {
           Profile
         </Typography>
 
-        <Paper sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <Avatar
-              sx={{ width: 100, height: 100, mb: 2 }}
-              alt={profile.name}
-              src="/static/images/avatar/1.jpg"
-            />
-            <Typography variant="h5">{profile.name}</Typography>
-          </Box>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
+        <Paper sx={{ p: 3 }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Name"
                   name="name"
                   value={profile.name}
                   onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  value={profile.email}
-                  onChange={handleInputChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -168,6 +197,7 @@ const Profile = () => {
                   value={profile.age}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -179,6 +209,7 @@ const Profile = () => {
                   value={profile.weight}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -190,6 +221,7 @@ const Profile = () => {
                   value={profile.height}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -200,6 +232,7 @@ const Profile = () => {
                     value={profile.gender}
                     label="Gender"
                     onChange={handleSelectChange}
+                    disabled={loading}
                   >
                     <MenuItem value="male">Male</MenuItem>
                     <MenuItem value="female">Female</MenuItem>
@@ -209,12 +242,24 @@ const Profile = () => {
               
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, mt: 2, mb: 2 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Basal Metabolic Rate (BMR): {bmr} kcal/day
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Calculated using the Mifflin-St Jeor Equation
-                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="h6" gutterBottom>
+                        Basal Metabolic Rate (BMR): {bmr} kcal/day
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Calculated using the Mifflin-St Jeor Equation
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="h6" gutterBottom>
+                        Daily Calorie Goal: {calorieGoal} kcal/day
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Based on your macronutrient goals
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Paper>
               </Grid>
 
@@ -232,6 +277,7 @@ const Profile = () => {
                   value={profile.proteinGoal}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -243,6 +289,7 @@ const Profile = () => {
                   value={profile.carbsGoal}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -254,34 +301,38 @@ const Profile = () => {
                   value={profile.fatGoal}
                   onChange={handleInputChange}
                   InputProps={{ inputProps: { min: 0 } }}
+                  disabled={loading}
                 />
               </Grid>
 
               <Grid item xs={12}>
-                <Paper sx={{ p: 2, mt: 2 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Daily Calorie Goal: {calorieGoal} kcal
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <Pie data={macroData} options={options} />
-                  </Box>
-                </Paper>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                >
-                  Update Profile
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    disabled={loading}
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </form>
+
+          <Box sx={{ mt: 4 }}>
+            <Pie data={macroData} options={options} />
+          </Box>
         </Paper>
       </Box>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message="Profile updated successfully"
+      />
     </Container>
   );
 };

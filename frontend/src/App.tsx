@@ -17,16 +17,16 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <NutritionProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="food-logging" element={<FoodLogging />} />
-                <Route path="profile" element={<Profile />} />
-              </Route>
-            </Routes>
-          </Router>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="food-logging" element={<FoodLogging />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
+          </Routes>
+        </Router>
         </NutritionProvider>
       </ThemeProvider>
     </QueryClientProvider>

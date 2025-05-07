@@ -11,6 +11,9 @@ import {
   Legend,
 } from 'chart.js';
 import { useNutrition } from '../context/NutritionContext';
+import { NutritionHistory } from '../components/NutritionHistory';
+import { useEffect, useState } from 'react';
+import { api } from '../services/api';
 
 Chart.register(
   CategoryScale,
@@ -23,14 +26,60 @@ Chart.register(
 );
 
 const Dashboard = () => {
-  const { calorieGoal } = useNutrition();
+  const { calorieGoal, userId } = useNutrition();
+  const [weeklyData, setWeeklyData] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWeeklyData = async () => {
+      try {
+        const response = await api.getAnalyze(userId);
+        const records = response.records;
+
+        // Get the last 7 days of data
+        const last7Days = Array(7).fill(0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        records.forEach((record: any) => {
+          const recordDate = new Date(parseInt(record.timestamp));
+          recordDate.setHours(0, 0, 0, 0);
+          
+          const daysDiff = Math.floor((today.getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysDiff < 7) {
+            last7Days[daysDiff] += record.summary.macros.calories;
+          }
+        });
+
+        setWeeklyData(last7Days.reverse());
+      } catch (error) {
+        console.error('Error fetching weekly data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeeklyData();
+  }, [userId]);
+
+  const getLast7Days = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      days.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+    }
+    return days;
+  };
 
   const nutritionData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: getLast7Days(),
     datasets: [
       {
         label: 'Calories',
-        data: [2100, 1950, 2300, 2100, 2200, 1800, 2000],
+        data: weeklyData,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
       },
@@ -128,7 +177,18 @@ const Dashboard = () => {
               height: 240,
             }}
           >
-            <Line options={options} data={nutritionData} />
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Typography>Loading chart data...</Typography>
+              </Box>
+            ) : (
+              <Line options={options} data={nutritionData} />
+            )}
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <NutritionHistory userId={userId} />
           </Paper>
         </Grid>
       </Grid>
