@@ -1,116 +1,65 @@
-# Nutrition Analysis System
+# Nutrition Analysis System Frontend
 
-A cloud-based system that enables users to record their daily food intake, automatically retrieves nutritional data from public databases, analyzes dietary patterns, and provides personalized insights based on nutritional goals.
-
-## Overview
-
-This project leverages AWS serverless architecture to create a comprehensive nutrition tracking and analysis system that helps users make informed dietary decisions. The system supports both text and voice input for food logging, connects to the USDA FoodData Central API for accurate nutritional information, and provides personalized insights based on user-specific health goals.
+This is the frontend application for the Nutrition Analysis System, built with React, TypeScript, and Material-UI.
 
 ## Features
 
-- **Intuitive Food Logging**: Record meals using simple text or voice input
-  - Natural language processing for food description parsing
-  - Support for voice input via Amazon Transcribe
-  - Confirmation table for input verification
+- Dashboard with nutrition summary and charts
+- Food logging interface
+- Nutrition analysis and insights
+- User profile management
+- Responsive design for all devices
 
-- **Accurate Nutritional Analysis**:
-  - Integration with USDA FoodData Central API
-  - Detailed breakdown of macro and micronutrients
-  - Personalized nutritional scoring based on health goals
+## Prerequisites
 
-- **Advanced Visualization**:
-  - Interactive charts for nutrient intake trends
-  - Food group balance visualization
-  - Meal timing impact analysis
-  - Goal progress tracking
+- Node.js (v16 or higher)
+- npm (v7 or higher)
 
-- **Personalized Insights**:
-  - Trend analysis over time
-  - Goal-based recommendations
-  - What-if scenario modeling
+## Setup
 
-## Data Processing Pipeline
-
-1. **Input Parsing Stage**:
-   - Process text/voice input via Amazon Transcribe and Comprehend
-   - Extract structured food data (food items, quantities, units)
-   - Confirm parsed data with user
-
-2. **Food Matching Stage**:
-   - Match structured food items against USDA FoodData Central API
-   - Identify most relevant matches using similarity scoring
-   - Cache frequent queries in DynamoDB
-
-3. **Nutritional Calculation Stage**:
-   - Retrieve detailed nutrient profiles using food IDs
-   - Calculate nutritional values based on specified quantities
-   - Compile daily totals and compare against goals
-
-4. **Data Enrichment & Storage Stages**:
-   - Enhance data with contextual metadata
-   - Store in appropriate databases for analysis
-   - Prepare visualization-ready data for frontend
-
-## Getting Started
-
-### Prerequisites
-
-- AWS Account with appropriate permissions
-- Node.js and npm installed
-- AWS CLI configured
-
-### Installation
-
-1. Clone the repository
-   ```
-   git clone https://github.com/Huangzjun/ee547project.git
-   cd nutrition-analysis-system
-   ```
-
-2. Install dependencies
-   ```
+1. Install dependencies:
+   ```bash
    npm install
    ```
 
-3. Deploy backend infrastructure
-   ```
-   npm run deploy:backend
-   ```
-
-4. Deploy frontend application
-   ```
-   npm run deploy:frontend
+2. Start the development server:
+   ```bash
+   npm run dev
    ```
 
-5. Configure environment variables
-   - Create a `.env` file based on `.env.example`
-   - Add your USDA API key and AWS configuration
+3. Build for production:
+   ```bash
+   npm run build
+   ```
 
-### Local Development
+## Project Structure
 
 ```
-npm run dev
+src/
+├── components/     # Reusable UI components
+├── pages/         # Page components
+├── services/      # API and service integrations
+├── hooks/         # Custom React hooks
+├── types/         # TypeScript type definitions
+├── utils/         # Utility functions
+├── assets/        # Static assets
+└── styles/        # Global styles and theme
 ```
 
-## Security & Privacy
+## Development
 
-- All data is encrypted at rest in DynamoDB and Timestream
-- JWT-based authentication for user access
-- No personally identifiable information (PII) is collected
-- User data is anonymized for trend analysis
-- Opt-in analytics and data collection
+- The application uses Vite for fast development and building
+- Material-UI for component library
+- React Query for data fetching
+- Chart.js for data visualization
+- AWS Amplify for authentication and hosting
 
-## Team
+## Contributing
 
-- Jiaji Yao - Frontend Development
-- Yichen Wang - LLM Development
-- Zijun Huang - Backend Development & DevOps & Infrastructure
+1. Create a new branch for your feature
+2. Make your changes
+3. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License
-
-## Acknowledgments
-
-- USDA FoodData Central for nutritional data
-- AWS for cloud infrastructure
+This project is part of the EE 547 course at USC. 
