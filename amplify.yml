@@ -1,19 +1,16 @@
 version: 1
-applications:
-  - appRoot: ee547project/frontend
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - cd ee547project/frontend
-            - npm ci
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: ee547project/frontend/dist
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - ee547project/frontend/node_modules/**/* 
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: build
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/* 
